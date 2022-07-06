@@ -52,18 +52,21 @@ class AwsUtils:
             return False, str(ex)
 
 
-    def download_file(self,bucket_name, s3_object_name, saved_file_name):
+    def download_file(self,bucket_name, s3_object_name, saved_file_name,config):
         try:
+            download_folder = config['PATH']['DownloadPath']
+            download_filename = s3_object_name.split('/')[-1]
+            download_path = os.path.join(download_folder,download_filename)
             s3 = boto3.client("s3", region_name=self.region_name, aws_access_key_id=self.aws_key_id,
             aws_secret_access_key=self.aws_secret_key)
-            file = s3.get_object(
-                Bucket=bucket_name, Key=s3_object_name
+            s3.download_file(
+                bucket_name, s3_object_name,download_path
             )
-            return True, file
+            return True, download_filename
         except Exception as ex:
             return False, str(ex)
 
-    def download_file(self,bucket_name, s3_object_name, saved_file_name):
+    def download_folder(self,bucket_name, s3_object_name, saved_file_name):
         try:
             s3 = boto3.client("s3", region_name=self.region_name, aws_access_key_id=self.aws_key_id,
             aws_secret_access_key=self.aws_secret_key)

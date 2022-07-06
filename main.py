@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_from_directory
 import configparser
 import os
 import json
 from werkzeug.utils import secure_filename
 from controller import Controller
+from util_function import delete_folder
 
 app = Flask(__name__)
 PATH = os.getcwd()
@@ -30,12 +31,15 @@ def store_file():
 
 @app.route('/retrieve_file', methods=['POST'])
 def retrieve_file():
+    download_folder = config['PATH']['DownloadPath']
     request_body_obj = request.json
+
     controller_obj = Controller(request_body_obj['instance'])
-    response, file = controller_obj.retrieve_file(request_body_obj)
-    if response:
-        return send_file(response)
-    return jsonify(file)
+    response_download, file_path = controller_obj.retrieve_file(request_body_obj)
+    if response_download:
+        return send_from_directory(download_folder, file_path,as_attachment=True)
+
+    return jsonify(file_path)
 
 
 

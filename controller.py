@@ -53,11 +53,11 @@ class Controller:
                 saved_file_name = request_body["save_file_name"]
                 aws_util_obj = AwsUtils(access_key_id, secret_key_id, region)
                 if not isfolder:
-                    response, file = aws_util_obj.download_file(bucket_name, s3_object_name, saved_file_name)
+                    is_downloaded, download_path = aws_util_obj.download_file(bucket_name, s3_object_name, saved_file_name, config)
                 else:
-                    response, file = aws_util_obj.download_folder(bucket_name, s3_object_name, saved_file_name)
-                if response:
-                    return True,file
-                return False, {'status_Code': 400, 'message': '', 'Reason': str(file)}
+                    is_downloaded, download_path = aws_util_obj.download_folder(bucket_name, s3_object_name, saved_file_name,config)
+                if is_downloaded:
+                    return is_downloaded,download_path
+                return False, {'status_Code': 400, 'message': '', 'Reason': str(download_path)}
         except Exception as ex:
             return False, {'status_Code': 400, 'message': '', 'Reason': str(ex)}
