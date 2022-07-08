@@ -1,7 +1,6 @@
 import boto3
 import os
-import zipfile
-from util_function import save_zip_file, delete_folder
+from util_function import save_zip_file, delete_folder, zip_folder
 
 
 
@@ -11,11 +10,10 @@ class AwsUtils:
         self.aws_secret_key = aws_secret_key
         self.region_name = region
 
-    def upload_file(self, bucket_name, file, s3_object_folder):
+    def upload_file(self, bucket_name, file):
         s3 = boto3.client("s3", region_name=self.region_name, aws_access_key_id=self.aws_key_id,
         aws_secret_access_key=self.aws_secret_key)
         try:
-            # s3.upload_file('C:/Users/shobhna/Documents/machine learning shobhna.pdf', bucket_name, 'machine learning shobhna.pdf')
             response = s3.upload_fileobj(
                 file,
                 bucket_name,
@@ -27,12 +25,12 @@ class AwsUtils:
         except Exception as ex:
             return False, str(ex)
 
-    def upload_folder(self, bucket_name, file, s3_object_folder, config):
+    def upload_folder(self, bucket_name, file, config):
         try:
             failed_upload = {}
             s3 = boto3.client("s3", region_name=self.region_name, aws_access_key_id=self.aws_key_id,
             aws_secret_access_key=self.aws_secret_key)
-            zip_file_path = config['Path']['DataPath']
+            zip_file_path = config['PATH']['DataPath']
             is_file_saved, saved_folder_name = save_zip_file(file, zip_file_path)
             if not is_file_saved:
                 return False, saved_folder_name
@@ -46,13 +44,13 @@ class AwsUtils:
                         failed_upload[object_name] = str(ex)
                         continue
             delete_folder(saved_folder_name)
-                    # s3.upload_file(full_path, bucket_name, object_name)
+
             return True, failed_upload
         except Exception as ex:
             return False, str(ex)
 
 
-    def download_file(self,bucket_name, s3_object_name, saved_file_name,config):
+    def download_file(self,bucket_name, s3_object_name,config):
         try:
             download_folder = config['PATH']['DownloadPath']
             download_filename = s3_object_name.split('/')[-1]
@@ -63,16 +61,5 @@ class AwsUtils:
                 bucket_name, s3_object_name,download_path
             )
             return True, download_filename
-        except Exception as ex:
-            return False, str(ex)
-
-    def download_folder(self,bucket_name, s3_object_name, saved_file_name):
-        try:
-            s3 = boto3.client("s3", region_name=self.region_name, aws_access_key_id=self.aws_key_id,
-            aws_secret_access_key=self.aws_secret_key)
-            file = s3.get_object(
-                Bucket=bucket_name, Key=s3_object_name
-            )
-            return True, file
         except Exception as ex:
             return False, str(ex)
